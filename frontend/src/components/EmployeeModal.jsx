@@ -6,6 +6,8 @@ import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import { useSelector, useDispatch } from "react-redux";
 import { updateEmployee, createEmployee } from "../Redux/Slice/employeeSlice";
+import CircularProgress from "@mui/material/CircularProgress";
+
 const style = {
   position: "absolute",
   top: "50%",
@@ -21,14 +23,14 @@ const style = {
 
 export default function EmployeeModal({ open, setOpen }) {
   const handleClose = () => setOpen((prev) => ({ ...prev, isOpen: false }));
-  const { employees } = useSelector((state) => state.employeeReducer);
+  const { employees, loading } = useSelector((state) => state.employeeReducer);
 
   React.useEffect(() => {
     if (open?.id && employees?.length > 0) {
       const found = employees.find((employee) => employee._id === open.id);
       setEmployeeData(found || {});
     }
-  }, [open.id, employees]);
+  }, [open.id]);
   const [employeeData, setEmployeeData] = React.useState({});
   const dispatch = useDispatch();
   const editHandler = () => {
@@ -166,17 +168,32 @@ export default function EmployeeModal({ open, setOpen }) {
                 Close
               </Button>
               {open.type === "edit" && (
-                <Button variant="contained" size="small" onClick={editHandler}>
-                  Save
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={editHandler}
+                  disabled={loading} // button disable during loading
+                >
+                  {loading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    "Save"
+                  )}
                 </Button>
               )}
+
               {open.type === "create" && (
                 <Button
                   variant="contained"
                   size="small"
                   onClick={createHandler}
+                  disabled={loading} // button disable during loading
                 >
-                  Create
+                  {loading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    "Create"
+                  )}
                 </Button>
               )}
             </Box>

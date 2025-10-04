@@ -13,14 +13,19 @@ import { useDispatch, useSelector } from "react-redux";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import EmployeeModal from "./EmployeeModal";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.common.black,
     color: theme.palette.common.white,
+    borderRight: `1px solid ${theme.palette.divider}`, // head cells right border
+    borderBottom: `1px solid ${theme.palette.divider}`, // head cells bottom border
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
+    borderRight: `1px solid ${theme.palette.divider}`, // body cells right border
+    borderBottom: `1px solid ${theme.palette.divider}`, // body cells bottom border
   },
 }));
 
@@ -28,35 +33,40 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
     backgroundColor: theme.palette.action.hover,
   },
-  // hide last border
   "&:last-child td, &:last-child th": {
-    border: 0,
+    borderBottom: `1px solid ${theme.palette.divider}`, // last row bottom border
   },
 }));
 
 export default function EmployeeTable() {
   const [open, setOpen] = React.useState({ id: null, isOpen: false, type: "" });
   const dispatch = useDispatch();
+
+  const { employees, loading } = useSelector((state) => state.employeeReducer);
+
   useEffect(() => {
     dispatch(getAllEmployees());
-  }, []);
-  const { employees } = useSelector((state) => state.employeeReducer);
-  const createHandler = (id) => {
-    setOpen((prev) => ({ ...prev, id: id, isOpen: true, type: "create" }));
+  }, [dispatch]);
+
+  const createHandler = () => {
+    setOpen({ id: null, isOpen: true, type: "create" });
   };
+
   const viewHandler = (id) => {
-    setOpen((prev) => ({ ...prev, id: id, isOpen: true, type: "view" }));
+    setOpen({ id: id, isOpen: true, type: "view" });
   };
+
   const editHandler = (id) => {
-    setOpen((prev) => ({ ...prev, id: id, isOpen: true, type: "edit" }));
+    setOpen({ id: id, isOpen: true, type: "edit" });
   };
+
   const deleteHandler = (id) => {
     dispatch(deleteEmployee(id));
-    setOpen((prev) => ({ ...prev, id: null, isOpen: false }));
+    setOpen({ id: null, isOpen: false, type: "" });
   };
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ width: "80%", boxShadow: "none" }}>
       <Box
         sx={{
           display: "flex",
@@ -68,7 +78,8 @@ export default function EmployeeTable() {
         <Button variant="contained" onClick={createHandler}>
           Add Employee
         </Button>
-      </Box>{" "}
+      </Box>
+
       <Table sx={{ minWidth: 700 }} aria-label="customized table">
         <TableHead>
           <TableRow>
@@ -84,52 +95,71 @@ export default function EmployeeTable() {
         </TableHead>
 
         <TableBody>
-          {employees.map((employee) => (
-            <StyledTableRow key={employee._id}>
-              <StyledTableCell component="th" scope="employee">
-                {employee.name}
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                {employee.contact}
-              </StyledTableCell>
-              <StyledTableCell align="right">{employee.email}</StyledTableCell>
-              <StyledTableCell align="right">
-                {employee.employeeId}
-              </StyledTableCell>
-              <StyledTableCell align="right">{employee.gender}</StyledTableCell>
-              <StyledTableCell align="right">
-                {employee.dateOfBirth}
-              </StyledTableCell>{" "}
-              <StyledTableCell align="right">
-                {employee.dateOfJoining}
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => viewHandler(employee._id)}
-                  >
-                    View
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() => editHandler(employee._id)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() => deleteHandler(employee._id)}
-                    color="error"
-                  >
-                    Delete
-                  </Button>
-                </Box>
-              </StyledTableCell>
-            </StyledTableRow>
-          ))}
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={8} align="center">
+                <CircularProgress />
+              </TableCell>
+            </TableRow>
+          ) : employees.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={8} align="center">
+                No Data Found
+              </TableCell>
+            </TableRow>
+          ) : (
+            employees.map((employee) => (
+              <StyledTableRow key={employee._id}>
+                <StyledTableCell component="th" scope="employee">
+                  {employee.name}
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {employee.contact}
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {employee.email}
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {employee.employeeId}
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {employee.gender}
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {employee.dateOfBirth}
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {employee.dateOfJoining}
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => viewHandler(employee._id)}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      variant="contained"
+                      onClick={() => editHandler(employee._id)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="contained"
+                      onClick={() => deleteHandler(employee._id)}
+                      color="error"
+                    >
+                      Delete
+                    </Button>
+                  </Box>
+                </StyledTableCell>
+              </StyledTableRow>
+            ))
+          )}
         </TableBody>
       </Table>
+
       <EmployeeModal open={open} setOpen={setOpen} />
     </TableContainer>
   );
