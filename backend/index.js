@@ -8,6 +8,10 @@ connectDb();
 
 const port = 2620;
 
+const cors = require("cors");
+
+app.use(cors());
+
 // IT WILL PARSE .body
 app.use(express.json());
 
