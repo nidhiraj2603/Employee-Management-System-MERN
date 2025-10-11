@@ -6,7 +6,9 @@ const connectDb = require("./config/mongoose");
 
 connectDb();
 
-const port = 2620;
+const port = process.env.PORT || 2620;
+
+require("dotenv").config();
 
 const cors = require("cors");
 
