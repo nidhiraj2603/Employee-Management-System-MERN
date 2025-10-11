@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "http://localhost:2620/employee";
+const API_URL = "https://0747ab6b83b5.ngrok-free.app/employee";
 
 // ================= CRUD Async Thunks =================
 
